@@ -160,7 +160,3 @@ sudo systemctl restart slurmd
 On Head Node: `srun -N3 hostname`
 
 ---
-
-# Run
-srun -N3 python3 mnist_dist.py
-```
