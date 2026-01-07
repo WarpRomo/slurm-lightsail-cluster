@@ -3,6 +3,7 @@ This project deploys a cross-region HPC cluster on AWS Lightsail, utilizing SLUR
 
 # Demo
 Demonstration of slurm commands, NFS shared storage, and running python script on the cluster.
+
 https://github.com/user-attachments/assets/423419ec-421d-4a34-8db0-ea8ac98f3a0d
 
 # Setup Guide
