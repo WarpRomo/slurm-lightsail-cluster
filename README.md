@@ -1,10 +1,13 @@
+
+
+# Setup Guide
 ## Infrastructure Overview
 *   **Head Node:** `ubuntu-1` (Public IP: `X.X.X.X`)
 *   **Worker 1:** `ubuntu-2` (Public IP: `Y.Y.Y.Y`)
 *   **Worker 2:** `ubuntu-3` (Public IP: `Z.Z.Z.Z`)
 *   **OS:** Ubuntu 22.04 LTS
 
-### Phase 1: AWS Firewall (Networking)
+### Step 1: AWS Firewall (Networking)
 Go to the **Lightsail Console > Networking** for **ALL 3 INSTANCES**. Add these IPv4 Firewall rules.
 *For maximum security, restrict these ports to the Public IPs of your other 2 nodes.*
 | Protocol | Port Range | Purpose |
@@ -27,7 +30,7 @@ Then, run setup_head.sh on your head node (ubuntu-1), and run setup_worker.sh on
 
 ## Option 2: Manual Configuration
 
-### Phase 2: System Prep & Auth
+### Step 2: System Prep & Auth
 **1. Set Hostnames (Run on respective nodes):**
 ```bash
 sudo hostnamectl set-hostname ubuntu-1  # On Head Node
@@ -57,7 +60,7 @@ sudo hostnamectl set-hostname ubuntu-3  # On Worker 2
 
 ---
 
-### Phase 3: NFS Shared Storage
+### Step 3: NFS Shared Storage
 **1. Setup Server (Head Node):**
 ```bash
 sudo apt update && sudo apt install nfs-kernel-server -y
@@ -85,7 +88,7 @@ echo "ubuntu-1:/home/ubuntu/cluster_share /home/ubuntu/cluster_share nfs default
 
 ---
 
-### Phase 4: SLURM Installation
+### Step 4: SLURM Installation
 **1. Install Software (Run on ALL 3 Nodes):**
 ```bash
 sudo add-apt-repository universe -y
