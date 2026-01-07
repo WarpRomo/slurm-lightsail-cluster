@@ -1,4 +1,7 @@
+# Demo
+This project deploys a cross-region HPC cluster on AWS Lightsail, utilizing SLURM for centralized job scheduling and NFS for shared storage across a Head Node and multiple Worker Nodes. The infrastructure relies on custom TCP whitelisting and Munge authentication to enable secure, synchronized communication between geographically separated instances.
 
+https://github.com/user-attachments/assets/423419ec-421d-4a34-8db0-ea8ac98f3a0d
 
 # Setup Guide
 ## Infrastructure Overview
