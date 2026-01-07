@@ -26,7 +26,31 @@ Go to the **Lightsail Console > Networking** for **ALL 3 INSTANCES**. Add these 
 ## Option 1: Automated Configuration
 
 Download the shell scripts in this repository. Next, modify 0_config.sh such that the IPs match the Static IPs of your nodes.
-Then, run setup_head.sh on your head node (ubuntu-1), and run setup_worker.sh on your compute nodes (ubuntu-2 and ubuntu-3).
+Copy these shell scripts to each of your nodes. Finally, run setup_head.sh on your head node (ubuntu-1), and run setup_worker.sh on your compute nodes (ubuntu-2 and ubuntu-3).
+
+### How to Run
+
+1.  **On Ubuntu-1 (Head):**
+    ```bash
+    chmod +x 0_config.sh setup_head.sh
+    ./setup_head.sh
+    ```
+    *(At the end, copy the big block of random text it prints).*
+
+2.  **On Ubuntu-2:**
+    ```bash
+    chmod +x 0_config.sh setup_worker.sh
+    ./setup_worker.sh 2
+    ```
+    *(Paste the key when asked).*
+
+3.  **On Ubuntu-3:**
+    ```bash
+    chmod +x 0_config.sh setup_worker.sh
+    ./setup_worker.sh 3
+    ```
+    *(Paste the key when asked).*
+
 
 ## Option 2: Manual Configuration
 
