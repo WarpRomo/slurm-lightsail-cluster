@@ -9,4 +9,3 @@ IP_WORKER2="Z.Z.Z.Z"  # Replace with Ubuntu-3 Public IP
 
 # Defines the specific ports
 SLURM_PORTS="60001-60009"
-PYTORCH_MASTER_PORT="60010"
