@@ -1,15 +1,12 @@
-### Infrastructure Overview
+## Infrastructure Overview
 *   **Head Node:** `ubuntu-1` (Public IP: `X.X.X.X`)
 *   **Worker 1:** `ubuntu-2` (Public IP: `Y.Y.Y.Y`)
 *   **Worker 2:** `ubuntu-3` (Public IP: `Z.Z.Z.Z`)
 *   **OS:** Ubuntu 22.04 LTS
 
----
-
 ### Phase 1: AWS Firewall (Networking)
 Go to the **Lightsail Console > Networking** for **ALL 3 INSTANCES**. Add these IPv4 Firewall rules.
 *For maximum security, restrict these ports to the Public IPs of your other 2 nodes.*
-
 | Protocol | Port Range | Purpose |
 | :--- | :--- | :--- |
 | **TCP** | `22` | SSH (PuTTY) |
@@ -19,9 +16,16 @@ Go to the **Lightsail Console > Networking** for **ALL 3 INSTANCES**. Add these 
 | **TCP** | `60011 - 60020`| PyTorch Workers |
 | **TCP** | `2049` | NFS Storage |
 | **TCP** | `111` | NFS RPC |
-| **UDP** | `111` | NFS RPC |
+| **UDP** | `111` | NFS RPC 
 
 ---
+
+## Option 1: Automated Configuration
+
+Download the shell scripts in this repository. Next, modify 0_config.sh such that the IPs match the Static IPs of your nodes.
+Then, run setup_head.sh on your head node (ubuntu-1), and run setup_worker.sh on your compute nodes (ubuntu-2 and ubuntu-3).
+
+## Option 2: Manual Configuration
 
 ### Phase 2: System Prep & Auth
 **1. Set Hostnames (Run on respective nodes):**
