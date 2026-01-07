@@ -15,7 +15,8 @@ https://github.com/user-attachments/assets/423419ec-421d-4a34-8db0-ea8ac98f3a0d
 
 ### Step 1: AWS Firewall (Networking)
 Go to the **Lightsail Console > Networking** for **ALL 3 INSTANCES**. Add these IPv4 Firewall rules.
-*For maximum security, restrict these ports to the Public IPs of your other 2 nodes.*
+For maximum security, restrict these ports to the Public IPs of your other 2 nodes.
+**Make sure to enable Static IPs for each cluster, so that the addresses don't change**
 | Protocol | Port Range | Purpose |
 | :--- | :--- | :--- |
 | **TCP** | `22` | SSH (PuTTY) |
