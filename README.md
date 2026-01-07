@@ -25,8 +25,6 @@ For maximum security, restrict these ports to the Public IPs of your other 2 nod
 | **TCP** | `22` | SSH (PuTTY) |
 | **TCP** | `6817 - 6818` | Slurm Controller |
 | **TCP** | `60001 - 60009` | Slurm Data (`srun`) |
-| **TCP** | `60010` | PyTorch Master |
-| **TCP** | `60011 - 60020`| PyTorch Workers |
 | **TCP** | `2049` | NFS Storage |
 | **TCP** | `111` | NFS RPC |
 | **UDP** | `111` | NFS RPC 
