@@ -14,7 +14,6 @@ echo "$IP_WORKER2 ubuntu-3" | sudo tee -a /etc/hosts
 sudo add-apt-repository universe -y
 sudo apt update
 sudo apt install munge slurm-wlm nfs-kernel-server python3-pip -y
-pip3 install torch torchvision
 
 # 3. Setup NFS Server
 echo ">>> CONFIGURING NFS SERVER..."
