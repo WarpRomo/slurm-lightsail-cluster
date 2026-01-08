@@ -19,7 +19,7 @@ https://github.com/user-attachments/assets/423419ec-421d-4a34-8db0-ea8ac98f3a0d
 ### Step 1: AWS Firewall (Networking)
 Go to the **Lightsail Console > Networking** for **ALL 3 INSTANCES**. Add these IPv4 Firewall rules.
 For maximum security, restrict these ports to the Public IPs of your other 2 nodes.
-**Make sure to enable Static IPs for each cluster, so that the addresses don't change**
+**Make sure to attach Static IPs to each node instance, so that the addresses don't change**
 | Protocol | Port Range | Purpose |
 | :--- | :--- | :--- |
 | **TCP** | `22` | SSH (PuTTY) |
@@ -33,7 +33,7 @@ For maximum security, restrict these ports to the Public IPs of your other 2 nod
 
 ## Option 1: Automated Configuration
 
-Download the shell scripts in this repository. Next, modify 0_config.sh such that the IPs match the Static IPs of your nodes.
+Download the shell scripts in this repository. Next, modify 0_config.sh such that the IPs match the Static IPs of your nodes. 
 Copy these shell scripts to each of your nodes. Finally, run setup_head.sh on your head node (ubuntu-1), and run setup_worker.sh on your compute nodes (ubuntu-2 and ubuntu-3).
 
 ### How to Run
