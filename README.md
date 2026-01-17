@@ -1,5 +1,5 @@
 # Slurm Lightsail Cluster
-This project deploys a cross-region HPC cluster on AWS Lightsail, utilizing SLURM for centralized job scheduling and NFS for shared storage across a Head Node and multiple Worker Nodes. The infrastructure relies on custom TCP whitelisting and Munge authentication to enable secure, synchronized communication between separated instances.
+This project deploys a High-Performance Computing (HPC) cluster on AWS Lightsail, utilizing SLURM for centralized job scheduling and NFS for shared storage across a Head Node and multiple Worker Nodes. The repository provides a comprehensive Ansible playbook to fully automate the setup, handling Munge authentication, DNS configuration, and service orchestration to enable secure, synchronized communication over private internal networking.
 
 # Demo
 Demonstration of slurm commands, NFS shared storage, and running python script on the cluster.
