@@ -103,7 +103,7 @@ ansible-playbook -i hosts.ini site.yml
 ---
 
 ## Option 2: Shell Scripts (Legacy)
-Download the shell scripts in this repository.
+Navigate to the `shell/` folder in this repository, and download the shell scripts.
 
 1.  Modify `0_config.sh` so that the `IP_HEAD` and `IP_WORKER` variables match your **Public IPs**.
 2.  Copy these shell scripts to **every** node.
