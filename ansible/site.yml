@@ -1,0 +1,179 @@
+---
+- name: Configure Common HPC Settings
+  hosts: cluster
+  become: true
+  pre_tasks:
+    - name: DEBUG - Verify IP Detection
+      debug:
+        msg: "Hostname: {{ inventory_hostname }} | Public: {{ ansible_host }} | Private: {{ hostvars[inventory_hostname]['private_ip'] }}"
+
+    - name: DEBUG - Check if Private IP is reachable
+      command: ping -c 1 {{ hostvars[inventory_hostname]['private_ip'] }}
+      changed_when: false
+  tasks:
+    - name: Disable UFW (OS Firewall) to allow internal traffic
+      service:
+        name: ufw
+        state: stopped
+        enabled: no
+
+    - name: Set Hostname
+      hostname:
+        name: "{{ inventory_hostname }}"
+
+    - name: Clean up /etc/hosts
+      lineinfile:
+        path: /etc/hosts
+        regexp: '^127\.0\.1\.1'
+        state: absent
+
+    # This creates a hosts file mapping hostnames to PRIVATE IPs
+    - name: Populate /etc/hosts with Private IPs
+      lineinfile:
+        path: /etc/hosts
+        line: "{{ hostvars[item].private_ip }} {{ item }}"
+        state: present
+      loop: "{{ groups['cluster'] }}"
+
+    - name: Install Dependencies
+      apt:
+        name:
+          - munge
+          - slurm-wlm
+          - python3-pip
+        update_cache: yes
+        state: present
+
+    - name: Create Cluster Share Directory
+      file:
+        path: /home/ubuntu/cluster_share
+        state: directory
+        owner: ubuntu
+        group: ubuntu
+        mode: '0777'
+
+    - name: Deploy Slurm Configuration
+      template:
+        src: templates/slurm.conf.j2
+        dest: /etc/slurm/slurm.conf
+        owner: slurm
+        group: slurm
+      notify: Restart Slurm Services
+
+    - name: Create Slurm Log Dir
+      file:
+        path: /var/log/slurm
+        state: directory
+        owner: slurm
+        group: slurm
+
+  handlers:
+    - name: Restart Slurm Services
+      service:
+        name: "{{ item }}"
+        state: restarted
+      loop:
+        - slurmd
+        - slurmctld
+      when: 
+        - item == 'slurmd' or (inventory_hostname in groups['head'] and item == 'slurmctld')
+
+- name: Configure Head Node
+  hosts: head
+  become: true
+  tasks:
+    - name: Install NFS Server
+      apt:
+        name: nfs-kernel-server
+        state: present
+
+    # Exports shared folder to the PRIVATE Subnet/IPs only
+    - name: Configure NFS Exports
+      copy:
+        content: |
+          /home/ubuntu/cluster_share *(rw,sync,no_subtree_check)
+        dest: /etc/exports
+      notify: Restart NFS
+
+    - name: Generate Munge Key
+      command: /usr/sbin/create-munge-key -r
+      args:
+        creates: /etc/munge/munge.key
+
+    - name: Set Munge Key Permissions
+      file:
+        path: /etc/munge/munge.key
+        owner: munge
+        group: munge
+        mode: '0400'
+      notify: Restart Munge
+
+    - name: Fetch Munge Key
+      fetch:
+        src: /etc/munge/munge.key
+        dest: buffer/munge.key
+        flat: yes
+
+    - name: Ensure Slurm Controller is Running
+      service:
+        name: slurmctld
+        state: started
+        enabled: yes
+
+  handlers:
+    - name: Restart NFS
+      service:
+        name: nfs-kernel-server
+        state: restarted
+
+    - name: Restart Munge
+      service:
+        name: munge
+        state: restarted
+
+- name: Configure Worker Nodes
+  hosts: workers
+  become: true
+  tasks:
+    - name: Install NFS Common
+      apt:
+        name: nfs-common
+        state: present
+
+    - name: Mount NFS Share (Using Private IP of Head)
+      mount:
+        path: /home/ubuntu/cluster_share
+        src: "{{ hostvars['ubuntu-1']['private_ip'] }}:/home/ubuntu/cluster_share"
+        fstype: nfs
+        opts: defaults
+        state: mounted
+
+    - name: Copy Munge Key
+      copy:
+        src: buffer/munge.key
+        dest: /etc/munge/munge.key
+        owner: munge
+        group: munge
+        mode: '0400'
+      notify: Restart Munge
+
+    - name: Ensure Slurmd is Running
+      service:
+        name: slurmd
+        state: started
+        enabled: yes
+
+  handlers:
+    - name: Restart Munge
+      service:
+        name: munge
+        state: restarted
+        
+- name: Finalize Cluster Setup (Restart Agents)
+  hosts: cluster
+  become: true
+  tasks:
+    - name: Restart Slurm Node Agent (slurmd) on ALL nodes
+      service:
+        name: slurmd
+        state: restarted

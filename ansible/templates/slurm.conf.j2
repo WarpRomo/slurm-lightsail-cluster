@@ -1,0 +1,29 @@
+ClusterName=mycluster
+SlurmctldHost=ubuntu-1
+MpiDefault=none
+ProctrackType=proctrack/pgid
+ReturnToService=1
+SlurmctldPidFile=/var/run/slurmctld.pid
+SlurmdPidFile=/var/run/slurmd.pid
+SlurmdSpoolDir=/var/lib/slurm/slurmd
+SlurmUser=root
+StateSaveLocation=/var/lib/slurm/slurmctld
+SwitchType=switch/none
+TaskPlugin=task/none
+SlurmctldTimeout=300
+SlurmdTimeout=300
+SrunPortRange=60001-60009
+SchedulerType=sched/backfill
+SelectType=select/cons_res
+SelectTypeParameters=CR_Core
+SlurmctldDebug=3
+SlurmctldLogFile=/var/log/slurm/slurmctld.log
+SlurmdDebug=3
+SlurmdLogFile=/var/log/slurm/slurmd.log
+
+# Dynamic Node Generation using PRIVATE IPs
+{% for host in groups['cluster'] %}
+NodeName={{ host }} NodeAddr={{ hostvars[host]['private_ip'] }} CPUs=2 RealMemory=400 State=UNKNOWN
+{% endfor %}
+
+PartitionName=debug Nodes={{ groups['cluster'] | join(',') }} Default=YES MaxTime=INFINITE State=UP
