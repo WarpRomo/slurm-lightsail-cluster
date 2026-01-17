@@ -11,7 +11,7 @@
 <br>
 Utilizes SLURM for centralized job scheduling and NFS for shared storage across a Head Node and multiple Worker Nodes.
 
-[Demo](#demo) • [Infrastructure](#infrastructure-overview) • [Ansible Automation](#option-1-ansible-automation-recommended) • [Manual Setup](#option-3-manual-configuration)
+[Demo](#demo) • [Infrastructure](#infrastructure-overview) • [Ansible Automation](#option-1-ansible-automation-recommended) • [Shell Setup](#option-2-shell-scripts)
 
 </div>
 
