@@ -25,7 +25,10 @@ Demonstration of slurm commands, NFS shared storage, and running a python script
 
 <div align="center">
   <img width="982" height="605" alt="Cluster Demo" src="https://github.com/user-attachments/assets/310ff299-7ae3-42ee-9289-daeccd097724" />
+  <img width="2306" height="258" alt="image" src="https://github.com/user-attachments/assets/80be19b2-645a-4e61-8f46-f092112724eb" />
+  <img width="1112" height="453" alt="image" src="https://github.com/user-attachments/assets/34dba87c-3df4-46e5-a161-a038718cc49f" />
 </div>
+
 
 > **Watch the full recording:** [View Demo Video](https://github.com/user-attachments/assets/423419ec-421d-4a34-8db0-ea8ac98f3a0d)
 
