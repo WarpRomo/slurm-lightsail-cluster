@@ -1,22 +1,49 @@
+<div align="center">
+
 # Slurm Lightsail Cluster
-This project deploys a High-Performance Computing (HPC) cluster on AWS Lightsail, utilizing SLURM for centralized job scheduling and NFS for shared storage across a Head Node and multiple Worker Nodes. The repository provides a comprehensive Ansible playbook to fully automate the setup, handling Munge authentication, DNS configuration, and service orchestration to enable secure, synchronized communication over private internal networking.
 
-# Demo
-Demonstration of slurm commands, NFS shared storage, and running python script on the cluster.
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](./LICENSE)
+[![Platform](https://img.shields.io/badge/platform-AWS%20Lightsail-orange.svg)](https://aws.amazon.com/lightsail/)
+[![Ansible](https://img.shields.io/badge/ansible-automated-red.svg)](https://www.ansible.com/)
+[![Slurm](https://img.shields.io/badge/scheduler-SLURM-blue.svg)](https://slurm.schedmd.com/)
 
-<img width="982" height="605" alt="image" src="https://github.com/user-attachments/assets/310ff299-7ae3-42ee-9289-daeccd097724" />
+**High-Performance Computing (HPC) cluster deployment on AWS Lightsail.**
+<br>
+Utilizes SLURM for centralized job scheduling and NFS for shared storage across a Head Node and multiple Worker Nodes.
 
-https://github.com/user-attachments/assets/423419ec-421d-4a34-8db0-ea8ac98f3a0d
+[Demo](#demo) • [Infrastructure](#infrastructure-overview) • [Ansible Automation](#option-1-ansible-automation-recommended) • [Manual Setup](#option-3-manual-configuration)
 
-# Setup Guide
-## Infrastructure Overview
+</div>
+
+---
+
+## Overview
+The repository provides a comprehensive Ansible playbook to fully automate the setup, handling Munge authentication, DNS configuration, and service orchestration to enable secure, synchronized communication over private internal networking.
+
+## Demo
+Demonstration of slurm commands, NFS shared storage, and running a python script on the cluster.
+
+<div align="center">
+  <img width="982" height="605" alt="Cluster Demo" src="https://github.com/user-attachments/assets/310ff299-7ae3-42ee-9289-daeccd097724" />
+</div>
+
+> **Watch the full recording:** [View Demo Video](https://github.com/user-attachments/assets/423419ec-421d-4a34-8db0-ea8ac98f3a0d)
+
+---
+
+## Setup Guide
+
+### Infrastructure Overview
 *   **Head Node:** `ubuntu-1`
 *   **Worker Nodes:** `ubuntu-2`, `ubuntu-3`, `ubuntu-4`...
 *   **OS:** Ubuntu 22.04 LTS
 
-### Step 1: AWS Firewall (Networking)
-Go to the **Lightsail Console > Networking** for **ALL INSTANCES**. Add these IPv4 Firewall rules.
-**Make sure to attach Static IPs to each node instance so that the addresses don't change.**
+### AWS Firewall (Networking)
+Navigate to the **Lightsail Console > Networking** for **ALL INSTANCES**. Add the following IPv4 Firewall rules.
+
+> [!IMPORTANT]
+> **Static IPs Required**
+> Ensure you attach Static IPs to each node instance so that the addresses do not change upon reboot.
 
 | Protocol | Port Range | Purpose |
 | :--- | :--- | :--- |
@@ -25,7 +52,7 @@ Go to the **Lightsail Console > Networking** for **ALL INSTANCES**. Add these IP
 | **TCP** | `60001 - 60009` | Slurm Data (`srun`) |
 | **TCP** | `2049` | NFS Storage |
 | **TCP** | `111` | NFS RPC |
-| **UDP** | `111` | NFS RPC 
+| **UDP** | `111` | NFS RPC |
 
 ---
 
@@ -36,7 +63,7 @@ This method is fully automated, idempotent, and scalable. It handles SSH keys, N
 *   You must run this from a Linux environment. **Windows users must use WSL (Ubuntu).**
 *   You need your AWS `.pem` private key file.
 
-### 1. Setup Environment (WSL/Linux)
+### 1. Setup Environment
 Install Ansible and set up your SSH key permissions:
 ```bash
 sudo apt update && sudo apt install ansible -y
@@ -57,83 +84,78 @@ ubuntu-1 ansible_host=X.X.X.X private_ip=172.26.x.x
 [workers]
 ubuntu-2 ansible_host=Y.Y.Y.Y private_ip=172.26.y.y
 ubuntu-3 ansible_host=Z.Z.Z.Z private_ip=172.26.z.z
-# You can add more workers here easily!
+# Additional workers can be added here
 ```
 
 ### 3. Run the Playbook
-Run the deployment. This will install dependencies, create users, mount storage, and start the cluster.
+Execute the deployment to install dependencies, create users, mount storage, and start the cluster.
+
 ```bash
 ansible-playbook -i hosts.ini site.yml
 ```
-*Note: If the playbook pauses at "Escalation Succeeded" for a long time, the nodes are likely installing automatic Ubuntu security updates. Wait 10-15 minutes and it will proceed.*
+
+> [!NOTE]
+> If the playbook pauses at "Escalation Succeeded" for a long time, the nodes are likely installing automatic Ubuntu security updates. Wait 10-15 minutes and it will proceed.
 
 ---
 
 ## Option 2: Shell Scripts (Legacy)
-Download the shell scripts in this repository. 
+Download the shell scripts in this repository.
 
 1.  Modify `0_config.sh` so that the `IP_HEAD` and `IP_WORKER` variables match your **Public IPs**.
 2.  Copy these shell scripts to **every** node.
 
-### How to Run
+### Execution Steps
 
-1.  **On Ubuntu-1 (Head):**
-    ```bash
-    chmod +x 0_config.sh setup_head.sh
-    ./setup_head.sh
-    ```
-    *(At the end, copy the big block of random text it prints).*
+**1. On Ubuntu-1 (Head Node):**
+```bash
+chmod +x 0_config.sh setup_head.sh
+./setup_head.sh
+```
+*(Copy the key block printed at the end of the script).*
 
-2.  **On Ubuntu-2:**
-    ```bash
-    chmod +x 0_config.sh setup_worker.sh
-    ./setup_worker.sh 2
-    ```
-    *(Paste the key when asked).*
+**2. On Ubuntu-2 (Worker 1):**
+```bash
+chmod +x 0_config.sh setup_worker.sh
+./setup_worker.sh 2
+```
+*(Paste the key when prompted).*
 
-3.  **On Ubuntu-3:**
-    ```bash
-    chmod +x 0_config.sh setup_worker.sh
-    ./setup_worker.sh 3
-    ```
-    *(Paste the key when asked).*
+**3. On Ubuntu-3 (Worker 2):**
+```bash
+chmod +x 0_config.sh setup_worker.sh
+./setup_worker.sh 3
+```
+*(Paste the key when prompted).*
 
 ---
 
 ## Option 3: Manual Configuration
 
-### Step 2: System Prep & Auth
-**1. Set Hostnames (Run on respective nodes):**
+### Step 1: System Prep & Auth
+
+**Set Hostnames** (Run on respective nodes):
 ```bash
 sudo hostnamectl set-hostname ubuntu-1  # On Head Node
 sudo hostnamectl set-hostname ubuntu-2  # On Worker 1
 sudo hostnamectl set-hostname ubuntu-3  # On Worker 2
 ```
 
-**2. Configure DNS (Run on ALL Nodes):**
-`sudo nano /etc/hosts`
-*   **Delete** the line starting with `127.0.1.1`.
-*   **Add** these lines at the bottom (Use real Public IPs):
-    ```text
-    X.X.X.X ubuntu-1
-    Y.Y.Y.Y ubuntu-2
-    Z.Z.Z.Z ubuntu-3
-    ```
+**Configure DNS** (Run on ALL Nodes):
+Edit `/etc/hosts`. Delete the line starting with `127.0.1.1` and add the following at the bottom (Use real Public IPs):
+```text
+X.X.X.X ubuntu-1
+Y.Y.Y.Y ubuntu-2
+Z.Z.Z.Z ubuntu-3
+```
 
-**3. SSH Passwordless Auth:**
-*   **On Head Node:**
-    ```bash
-    ssh-keygen -t rsa  # Press Enter for all prompts
-    cat ~/.ssh/id_rsa.pub
-    ```
-    *(Copy the output).*
-*   **On Workers (`ubuntu-2` & `3`):**
-    `nano ~/.ssh/authorized_keys` -> Paste the key at the bottom.
+**SSH Passwordless Auth:**
+1.  **On Head Node:** Run `ssh-keygen -t rsa`, press Enter for all prompts, and copy the content of `~/.ssh/id_rsa.pub`.
+2.  **On Workers:** Paste the key into `~/.ssh/authorized_keys`.
 
----
+### Step 2: NFS Shared Storage
 
-### Step 3: NFS Shared Storage
-**1. Setup Server (Head Node):**
+**Setup Server (Head Node):**
 ```bash
 sudo apt update && sudo apt install nfs-kernel-server -y
 mkdir -p /home/ubuntu/cluster_share
@@ -146,7 +168,7 @@ sudo exportfs -ra
 sudo systemctl restart nfs-kernel-server
 ```
 
-**2. Setup Clients (Workers):**
+**Setup Clients (Workers):**
 ```bash
 sudo apt update && sudo apt install nfs-common -y
 mkdir -p /home/ubuntu/cluster_share
@@ -158,9 +180,8 @@ sudo mount ubuntu-1:/home/ubuntu/cluster_share /home/ubuntu/cluster_share
 echo "ubuntu-1:/home/ubuntu/cluster_share /home/ubuntu/cluster_share nfs defaults 0 0" | sudo tee -a /etc/fstab
 ```
 
----
+### Step 3: SLURM Installation
 
-### Step 4: SLURM Installation
 **1. Install Software (Run on ALL Nodes):**
 ```bash
 sudo add-apt-repository universe -y
@@ -169,19 +190,16 @@ sudo apt install munge slurm-wlm -y
 ```
 
 **2. Munge Authentication:**
-*   **On Head Node:**
+*   **On Head Node:** Create the key.
     ```bash
-    # Create and encode key
     sudo /usr/sbin/create-munge-key -r
     sudo cat /etc/munge/munge.key | base64
     ```
-    *(Copy the text block)*.
-*   **On Workers:**
+*   **On Workers:** Decode and save the key (Paste the output from Head Node).
     ```bash
-    # Decode and save key
     echo "PASTED_TEXT_BLOCK" | base64 -d | sudo tee /etc/munge/munge.key
     ```
-*   **On ALL Nodes:**
+*   **On ALL Nodes:** Set permissions.
     ```bash
     sudo chown munge:munge /etc/munge/munge.key
     sudo chmod 400 /etc/munge/munge.key
@@ -189,7 +207,7 @@ sudo apt install munge slurm-wlm -y
     ```
 
 **3. Configure SLURM (Run on ALL Nodes):**
-`sudo nano /etc/slurm/slurm.conf` -> Paste this exact config:
+Edit `/etc/slurm/slurm.conf` and paste this exact config:
 ```text
 ClusterName=mycluster
 SlurmctldHost=ubuntu-1
@@ -235,5 +253,8 @@ sudo systemctl restart slurmd
 ```
 *(On Head Node Only: `sudo systemctl restart slurmctld`)*
 
-**5. Test:**
-On Head Node: `srun -N3 hostname`
+**5. Verification:**
+On Head Node, run:
+```bash
+srun -N3 hostname
+```
