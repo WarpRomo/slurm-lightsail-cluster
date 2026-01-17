@@ -24,7 +24,7 @@ The repository provides a comprehensive Ansible playbook to fully automate the s
 Demonstration of slurm commands, NFS shared storage, and running a python script on the cluster.
 
 <div align="center">
-  <img width="982" height="605" alt="Cluster Demo" src="https://github.com/user-attachments/assets/310ff299-7ae3-42ee-9289-daeccd097724" />
+  <img width="995" height="722" alt="image" src="https://github.com/user-attachments/assets/26bd7631-7c68-435b-b235-c3c3a10a0d5f" />
   <img width="2306" height="258" alt="image" src="https://github.com/user-attachments/assets/80be19b2-645a-4e61-8f46-f092112724eb" />
   <img width="1112" height="453" alt="image" src="https://github.com/user-attachments/assets/34dba87c-3df4-46e5-a161-a038718cc49f" />
 </div>
