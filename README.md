@@ -108,9 +108,6 @@ Navigate to the `shell/` folder in this repository, and download the shell scrip
 1.  Modify `0_config.sh` so that the `IP_HEAD` and `IP_WORKER` variables match your **Public IPs**.
 2.  Copy these shell scripts to **every** node.
 
-> [!NOTE]
-> The Shell script version of this project only supports 1 Head node and 2 Worker nodes. If you would like unlimited nodes, use the Ansible Playbook provided in this repository. 
-
 ### Execution Steps
 
 **1. On Ubuntu-1 (Head Node):**
@@ -134,4 +131,5 @@ chmod +x 0_config.sh setup_worker.sh
 ```
 *(Paste the key when prompted).*
 
----
+> [!NOTE]
+> The Shell script version of this project only supports 1 Head node and 2 Worker nodes. If you would like unlimited nodes, use the Ansible Playbook provided in this repository. 
