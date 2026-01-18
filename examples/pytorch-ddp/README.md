@@ -72,9 +72,8 @@ Open your web browser to [http://localhost:6006](http://localhost:6006).
 Below are examples of the training process viewed through TensorBoard.
 
 <div align="center">
-
-  <br><br>
-
+  <img width="675" height="578" alt="image" src="https://github.com/user-attachments/assets/a1c6be2a-66d5-49be-bd9d-40468d706e60" />
+  <img width="1570" height="376" alt="image" src="https://github.com/user-attachments/assets/422a4e2d-9b48-4be2-b1be-7fa2c2712b70" />
 </div>
 
 > [!NOTE]
