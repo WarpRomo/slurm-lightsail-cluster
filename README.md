@@ -42,7 +42,8 @@ Demonstration of slurm commands, NFS shared storage, and running a python script
 *   **OS:** Ubuntu 22.04 LTS
 
 ### AWS Firewall (Networking)
-You are required to do this step if you would like nodes to work cross-region. Otherwise, if all nodes are in the same region, you may skip this step. Navigate to the **Lightsail Console > Networking** for **ALL INSTANCES**. Add the following IPv4 Firewall rules.
+You are required to do this step if you would like nodes to work cross-region. Otherwise, if all nodes are in the same region, you may skip this step. 
+Navigate to the **Lightsail Console > Networking** for **ALL INSTANCES**. Add the following IPv4 Firewall rules.
 
 > [!IMPORTANT]
 > **Static IPs Required**
