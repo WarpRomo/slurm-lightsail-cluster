@@ -18,6 +18,15 @@ This example demonstrates:
 | `run_training.sbatch` | The Slurm submission script. It defines the resource allocation and sets up the execution environment. |
 | `tensorboard.sh` | A helper script to launch TensorBoard with a fast reload interval for real-time monitoring. |
 
+## Demo
+
+Below are examples of the training process viewed through TensorBoard.
+
+<div align="center">
+  <img width="675" height="578" alt="image" src="https://github.com/user-attachments/assets/a1c6be2a-66d5-49be-bd9d-40468d706e60" />
+  <img width="1570" height="376" alt="image" src="https://github.com/user-attachments/assets/422a4e2d-9b48-4be2-b1be-7fa2c2712b70" />
+</div>
+
 ## Prerequisites
 
 Ensure your cluster is set up with the shared NFS directory mounted at `/home/ubuntu/cluster_share`.
@@ -66,15 +75,6 @@ ssh -L 6006:localhost:6006 ubuntu@<HEAD_NODE_IP>
 ```
 
 Open your web browser to [http://localhost:6006](http://localhost:6006).
-
-## Demo
-
-Below are examples of the training process viewed through TensorBoard.
-
-<div align="center">
-  <img width="675" height="578" alt="image" src="https://github.com/user-attachments/assets/a1c6be2a-66d5-49be-bd9d-40468d706e60" />
-  <img width="1570" height="376" alt="image" src="https://github.com/user-attachments/assets/422a4e2d-9b48-4be2-b1be-7fa2c2712b70" />
-</div>
 
 > [!NOTE]
 > **Data Synchronization**
