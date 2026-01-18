@@ -1,0 +1,1 @@
+tensorboard --logdir /home/ubuntu/cluster_share/runs --port 6006 --bind_all
