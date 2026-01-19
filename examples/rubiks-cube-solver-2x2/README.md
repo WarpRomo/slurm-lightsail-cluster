@@ -4,7 +4,7 @@ This directory contains a high-performance, distributed solver for the 2x2 Rubik
 
 ## Overview
 
-This example demonstrates:
+This project demonstrates:
 *   **Distributed Computing:** Using `mpi4py` to scatter search frontiers across worker nodes.
 *   **Algorithmic Optimization:** Implementing a "Fixed Corner" strategy to reduce state space redundancy by normalizing cube orientation.
 *   **Pattern Databases:** Pre-computing the back-half of the search tree to instant lookup tables.
