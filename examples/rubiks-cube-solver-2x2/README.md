@@ -109,7 +109,7 @@ Rank       | States Explored | Contribution
 
 > [!NOTE]
 > **Normalization**
-> If the input state is not oriented correctly (the fixed corner is in the wrong spot), the solver will print "PRE-SOLVE ORIENTATION REQUIRED" and automatically handle the rotation internally before solving.
+> If the input state is not oriented correctly (the fixed corner is in the wrong spot), the solver will print "PRE-SOLVE ORIENTATION REQUIRED" and automatically handle the rotation internally before solving. Also, Magenta is used to represent Orange, as Orange is not present in colorama.
 
 > [!IMPORTANT]
 > **Performance**
