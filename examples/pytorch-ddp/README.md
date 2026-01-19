@@ -1,10 +1,10 @@
-# PyTorch Distributed Data Parallel (DDP) Example
+# PyTorch Distributed Data Parallel (DDP)
 
-This directory contains a complete example of training a Convolutional Neural Network (CNN) on the MNIST dataset using **PyTorch DDP**. It is optimized for CPU-only clusters (like standard AWS Lightsail instances) using the **Gloo** backend.
+This directory contains a complete project of training a Convolutional Neural Network (CNN) on the MNIST dataset using **PyTorch DDP**. It is optimized for CPU-only clusters (like standard AWS Lightsail instances) using the **Gloo** backend.
 
 ## Overview
 
-This example demonstrates:
+This project demonstrates:
 *   **Multi-Node Training:** Synchronizing gradients across multiple worker nodes.
 *   **Shared Storage:** Using NFS at `/home/ubuntu/cluster_share` for datasets and checkpoints.
 *   **Real-time Monitoring:** Custom TensorBoard logging with fast refresh rates.
@@ -54,7 +54,7 @@ pip install tensorboard
 The Slurm script is configured to use absolute paths. Submit it from anywhere:
 
 ```bash
-cd /home/ubuntu/cluster_share/examples/pytorch-ddp
+cd /home/ubuntu/cluster_share/projects/pytorch-ddp
 sbatch run_training.sbatch
 ```
 
