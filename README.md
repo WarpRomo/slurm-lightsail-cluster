@@ -20,9 +20,9 @@ Utilizes SLURM for centralized job scheduling and NFS for shared storage across 
 ## Overview
 The repository provides a comprehensive Ansible playbook to fully automate the setup, handling Munge authentication, DNS configuration, and service orchestration to enable secure, synchronized communication over private internal networking.
 
-Alongside this infrastructure, this repository has HPC examples to demonstrate cluster capabilities:
+Alongside this infrastructure, this repository has HPC projects to demonstrate cluster capabilities:
 
-| Example Project | Description | Key Technologies |
+| Project | Description | Key Technologies |
 | :--- | :--- | :--- |
 | **[PyTorch DDP](./examples/pytorch-ddp)** | Distributed training of a CNN on the MNIST dataset with real-time TensorBoard monitoring. | PyTorch DDP, NFS, Gloo |
 | **[Rubik's Cube Solver](./examples/rubiks-cube-solver-2x2)** | High-performance distributed solver utilizing Bidirectional BFS and MPI pattern databases. | MPI (`mpi4py`), Algorithms, Python |
