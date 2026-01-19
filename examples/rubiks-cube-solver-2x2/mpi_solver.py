@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 mpi_solver.py: Distributed 2x2 Cube Solver using MPI.
-Includes automatic state normalization (rotation) using existing moves.
+Refactored to prevent deadlocks and ensure statistics printing.
 """
 from mpi4py import MPI
 import pickle
@@ -12,46 +12,28 @@ from cube_utils import ALL_MOVES, apply_move, get_inverse_move
 
 DB_FILE = "halfway.pkl"
 
+# --- Rotation & Normalization Logic ---
 def apply_cube_rotation(state, rot_axis):
-    """
-    Simulates a whole cube rotation using basic face turns.
-    y (Vertical axis)   = U + D'
-    x (Horizontal axis) = R + L'
-    """
     if rot_axis == 'y':
-        # Rotate around U/D axis: Top goes one way, Bottom goes the opposite
         s = apply_move(state, 'U')
         return apply_move(s, "D'")
     elif rot_axis == 'x':
-        # Rotate around R/L axis: Right goes one way, Left goes the opposite
         s = apply_move(state, 'R')
         return apply_move(s, "L'")
     return state
 
 def normalize_to_fixed_corner(state):
-    """
-    Finds a sequence of whole-cube rotations (x, y) to place the
-    Back-Down-Left corner stickers (Values 6, 19, 22) into their
-    solved indices [6, 19, 22].
-    """
-    # The Fixed Corner Indices in our restricted move set <R, U, F>
-    # are L_BottomLeft(6), B_BottomRight(19), D_BottomLeft(22).
-    
-    # Check if solved stickers 6, 19, 22 are at these indices.
     def is_normalized(s):
         return (s[6] == 6 and s[19] == 19 and s[22] == 22)
 
     if is_normalized(state):
         return state, []
 
-    # BFS for orientation
-    # We only need x and y rotations to reach all 24 orientations.
     queue = deque([(state, [])])
     visited = {state}
     
     while queue:
         curr, path = queue.popleft()
-        
         for rot in ['x', 'y']:
             nxt = apply_cube_rotation(curr, rot)
             if nxt not in visited:
@@ -63,20 +45,14 @@ def normalize_to_fixed_corner(state):
     raise ValueError("State invalid: Fixed corner (Values 6,19,22) not found together.")
 
 def reconstruct_full_path(meet_state, forward_path, backward_db):
-    """
-    Combines the forward path (Start -> Meet) 
-    with the backward path (Meet -> Solved).
-    """
     full_path = list(forward_path)
     curr = meet_state
     back_moves = []
     
-    # Traceback from Meet -> Solved
     while True:
         entry = backward_db.get(curr)
         if not entry or entry[0] is None: 
             break
-            
         parent, move = entry
         back_moves.append(get_inverse_move(move))
         curr = parent
@@ -84,6 +60,7 @@ def reconstruct_full_path(meet_state, forward_path, backward_db):
     return full_path + back_moves
 
 def main():
+    # --- MPI INIT ---
     comm = MPI.COMM_WORLD
     rank = comm.Get_rank()
     size = comm.Get_size()
@@ -93,92 +70,98 @@ def main():
     try:
         with open(DB_FILE, "rb") as f:
             backward_db = pickle.load(f)
-    except FileNotFoundError:
-        if rank == 0: 
-            print(f"Error: {DB_FILE} missing. Run generate_db.py first.")
-            comm.Abort(1)
+    except Exception as e:
+        print(f"[Node {rank}] Error loading DB: {e}", flush=True)
+        comm.Abort(1)
         sys.exit(1)
+
+    print(f"[Node {rank}] Database loaded. Active.", flush=True)
+
+    # BARRIER 1: Ensure all nodes are ready before Manager starts
+    comm.Barrier()
 
     # --- 2. Setup Manager (Rank 0) ---
     global_visited = set()
     frontier = [] 
+    local_state_count = 0 # Stat tracking
+    
+    # Logic flags
+    found_solution_flag = False
     
     if rank == 0:
         parser = argparse.ArgumentParser()
-        parser.add_argument("input", help="State string (space separated) or file path")
+        parser.add_argument("input", help="State string (space separated)")
         args = parser.parse_args()
         
         try:
-            with open(args.input, 'r') as f:
-                content = f.read().strip()
-                start_state = tuple(map(int, content.split()))
-        except FileNotFoundError:
-            try:
-                start_state = tuple(map(int, args.input.split()))
-            except ValueError:
-                print("Error: Invalid input format.")
-                comm.Abort(1)
+            # Parse input string
+            start_state = tuple(map(int, args.input.split()))
+        except Exception:
+            print("Error: Invalid input format.", flush=True)
+            comm.Abort(1)
         
-        # --- NORMALIZATION STEP ---
+        # Normalization
         try:
             norm_state, setup_moves = normalize_to_fixed_corner(start_state)
-            
             if setup_moves:
-                print("\n" + "="*40)
-                print("PRE-SOLVE ORIENTATION REQUIRED")
-                print(f"Hold the cube and rotate: {' '.join(setup_moves)}")
-                print("(x = Turn whole cube up, y = Turn whole cube left)")
-                print("="*40 + "\n")
+                print("\n" + "="*40, flush=True)
+                print("PRE-SOLVE ORIENTATION REQUIRED", flush=True)
+                print(f"Rotate: {' '.join(setup_moves)}", flush=True)
+                print("="*40 + "\n", flush=True)
             else:
-                print("[Manager] Cube already oriented correctly.")
-                
+                print("[Manager] Cube oriented correctly.", flush=True)
             start_state = norm_state
-            
         except ValueError as e:
-            print(f"Error: {e}")
+            print(f"Error: {e}", flush=True)
             comm.Abort(1)
 
-        print(f"[Manager] Solving Normalized State...")
+        print(f"[Manager] Solving Normalized State...", flush=True)
         
-        # Check if already in DB
+        # Check if start is already in DB
         if start_state in backward_db:
             sol = reconstruct_full_path(start_state, [], backward_db)
-            print("\n*** SOLUTION FOUND (In DB) ***")
-            print(f"Moves: {' '.join(sol)}")
-            comm.bcast("DONE", root=0)
-            sys.exit(0)
-
-        frontier = [(start_state, [])]
-        global_visited.add(start_state)
+            print("\n*** SOLUTION FOUND (In DB) ***", flush=True)
+            print(f"Moves: {' '.join(sol)}", flush=True)
+            found_solution_flag = True
+            # We do NOT exit here. We enter the loop so we can cleanly tell workers to STOP.
+        else:
+            frontier = [(start_state, [])]
+            global_visited.add(start_state)
 
     # --- 3. Synchronous BFS Loop ---
     step = 0
     while True:
-        instruction = "CONTINUE"
-        if rank == 0:
-            if not frontier: instruction = "FAIL"
+        # --- A. DECISION PHASE (Happens at Top of Loop) ---
+        instruction = "SEARCH"
         
+        if rank == 0:
+            if found_solution_flag:
+                instruction = "DONE"
+            elif not frontier:
+                instruction = "FAIL"
+        
+        # Broadcast decision to all workers
         instruction = comm.bcast(instruction, root=0)
         
-        if instruction == "DONE": break
+        # Check decision
+        if instruction == "DONE":
+            break
         if instruction == "FAIL":
-            if rank == 0: print("Search exhausted. No solution.")
+            if rank == 0: print("Search exhausted. No solution.", flush=True)
             break
 
-        # --- Distribute Frontier ---
+        # --- B. WORK DISTRIBUTION ---
         chunks = []
         if rank == 0:
-            print(f"[Step {step}] Frontier Size: {len(frontier)}")
-            
+            print(f"[Step {step}] Frontier Size: {len(frontier)}", flush=True)
             pad_needed = (size - (len(frontier) % size)) % size
             frontier.extend([None] * pad_needed)
-            
             k = len(frontier) // size
             chunks = [frontier[i * k : (i + 1) * k] for i in range(size)]
         
         local_tasks = comm.scatter(chunks, root=0)
 
-        # --- Compute (Workers) ---
+        # --- C. LOCAL COMPUTATION ---
         local_next_level = []
         solution_found = None
 
@@ -188,13 +171,12 @@ def main():
                 
                 curr_state, curr_path = task
                 
-                # OPTIMIZATION:
-                # Since we normalized the cube, we only need to search moves
-                # that preserve the fixed corner (R, U, F).
-                # Moving L, B, or D would break the normalization.
+                # Use Restricted Move Set (R, U, F) to stay in fixed-corner space
                 MOVES_TO_USE = [m for m in ALL_MOVES if m[0] in ['R', 'U', 'F']]
                 
                 for m_name in MOVES_TO_USE:
+                    local_state_count += 1 # Increment counter
+                    
                     nxt = apply_move(curr_state, m_name)
                     
                     if nxt in backward_db:
@@ -205,36 +187,52 @@ def main():
                 
                 if solution_found: break
 
-        # --- Gather & Sync ---
+        # --- D. GATHER RESULTS ---
         all_solutions = comm.gather(solution_found, root=0)
         all_candidates = comm.gather(local_next_level, root=0)
 
-        # --- Manager Update ---
+        # --- E. MANAGER UPDATE (Rank 0 only) ---
         if rank == 0:
             final_sol = next((s for s in all_solutions if s), None)
             
             if final_sol:
-                print("\n" + "="*40)
-                print("*** SOLUTION FOUND ***")
-                print(f"Moves: {len(final_sol)}")
-                print(f"Sequence: {' '.join(final_sol)}")
-                print("="*40)
-                comm.bcast("DONE", root=0)
-                break
+                print("\n" + "="*40, flush=True)
+                print("*** SOLUTION FOUND ***", flush=True)
+                print(f"Moves: {len(final_sol)}", flush=True)
+                print(f"Sequence: {' '.join(final_sol)}", flush=True)
+                print("="*40, flush=True)
+                found_solution_flag = True
+                # Loop will repeat, hit Decision Phase, and broadcast DONE.
             else:
-                comm.bcast("CONTINUE", root=0)
+                # Update frontier for next step
+                new_frontier = []
+                for batch in all_candidates:
+                    for state, path in batch:
+                        if state not in global_visited:
+                            global_visited.add(state)
+                            new_frontier.append((state, path))
+                frontier = new_frontier
+                step += 1
+        
+        # Workers hit end of loop and return to 'instruction = comm.bcast'
+    
+    # --- 4. GATHER STATISTICS ---
+    # Everyone reaches here after 'break'
+    comm.Barrier() # Optional safety
+    
+    all_counts = comm.gather(local_state_count, root=0)
 
-            new_frontier = []
-            for batch in all_candidates:
-                for state, path in batch:
-                    if state not in global_visited:
-                        global_visited.add(state)
-                        new_frontier.append((state, path))
-            
-            frontier = new_frontier
-            step += 1
-        else:
-            pass
+    if rank == 0:
+        print("\n--- Cluster Statistics ---", flush=True)
+        total_explored = sum(all_counts)
+        print(f"{'Rank':<10} | {'States Explored':<15} | {'Contribution':<12}", flush=True)
+        print("-" * 45, flush=True)
+        for r, count in enumerate(all_counts):
+            pct = (count / total_explored * 100) if total_explored > 0 else 0
+            print(f"{r:<10} | {count:<15} | {pct:.1f}%", flush=True)
+        print("-" * 45, flush=True)
+        print(f"Total States Explored: {total_explored}", flush=True)
+        print("-" * 45, flush=True)
 
 if __name__ == "__main__":
     main()

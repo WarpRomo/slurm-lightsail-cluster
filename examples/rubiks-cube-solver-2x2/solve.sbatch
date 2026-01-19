@@ -1,9 +1,12 @@
 #!/bin/bash
+#SBATCH --output=./logs/solver.out  # %x=job name, %j=job id
+#SBATCH --error=./logs/solver.err
 #SBATCH --job-name=cube_solver
 #SBATCH --nodes=5
 #SBATCH --ntasks-per-node=1
-#SBATCH --output=solution-%j.out
-#SBATCH --error=solution-%j.err
+mkdir -p logs
+
+source /home/ubuntu/cluster_share/venv/bin/activate
 
 # 1. Validation: Ensure a scramble was passed
 if [ -z "$1" ]; then
