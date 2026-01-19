@@ -24,8 +24,8 @@ Alongside this infrastructure, this repository has HPC projects to demonstrate c
 
 | Project | Description | Key Technologies |
 | :--- | :--- | :--- |
-| **[PyTorch DDP](./examples/pytorch-ddp)** | Distributed training of a CNN on the MNIST dataset with real-time TensorBoard monitoring. | PyTorch DDP, NFS, Gloo |
-| **[Rubik's Cube Solver](./examples/rubiks-cube-solver-2x2)** | High-performance distributed solver utilizing Bidirectional BFS and MPI pattern databases. | MPI (`mpi4py`), Algorithms, Python |
+| **[PyTorch DDP](./projects/pytorch-ddp)** | Distributed training of a CNN on the MNIST dataset with real-time TensorBoard monitoring. | PyTorch DDP, NFS, Gloo |
+| **[Rubik's Cube Solver](./projects/rubiks-cube-solver-2x2)** | High-performance distributed solver utilizing Bidirectional BFS and MPI pattern databases. | MPI (`mpi4py`), Algorithms, Python |
 
 ## Demo
 Demonstration of slurm commands, NFS shared storage, and running a python script on the cluster.
