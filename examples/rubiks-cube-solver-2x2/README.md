@@ -113,4 +113,4 @@ Rank       | States Explored | Contribution
 
 > [!IMPORTANT]
 > **Performance**
-> This solver is optimized for finding the *optimal* (shortest) solution. For hard scrambles (11+ moves), the frontier grows exponentially. Using more nodes significantly reduces the time per depth level.
+> This solver is optimized for finding the *optimal* (shortest) solution. Using more nodes significantly reduces the time per depth level.
