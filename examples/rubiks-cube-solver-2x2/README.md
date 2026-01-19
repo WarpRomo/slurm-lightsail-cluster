@@ -66,7 +66,7 @@ Before running any solves, you must generate the pattern database. This only nee
 cd /home/ubuntu/cluster_share/examples/rubiks-cube-solver-2x2
 python3 generate_db.py
 ```
-*This will create a `halfway.pkl` file (approx 10-20MB).*
+*This will create a `halfway.pkl` file (~10MB).*
 
 ### 2. Submit a Job
 To solve a cube, submit the `solve.sbatch` script with a scramble sequence (represented as 24 integers).
