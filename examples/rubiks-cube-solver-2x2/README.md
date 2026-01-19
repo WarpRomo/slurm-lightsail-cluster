@@ -10,6 +10,15 @@ This example demonstrates:
 *   **Pattern Databases:** Pre-computing the back-half of the search tree to instant lookup tables.
 *   **State Visualization:** Terminal-based colored visualization of the cube state.
 
+## Demo
+
+Below are examples of the solver running on the cluster, distributing the workload, and finding the optimal solution.
+
+<div align="center">
+  <img width="1000" alt="cube1" src="https://github.com/user-attachments/assets/2c2990ac-7403-42a6-a5f2-fe76cefa935d" />
+  <img width="1000" alt="cube2" src="https://github.com/user-attachments/assets/0d3c07b3-f838-47f1-aaac-669e51e3194c" />
+</div>
+
 ## Files
 
 | File | Description |
@@ -19,12 +28,6 @@ This example demonstrates:
 | `solve.sbatch` | The Slurm submission script. It handles environment setup, MPI execution, and node allocation. |
 | `cube_utils.py` | Core logic library containing move definitions, state transitions, and visualization tools. |
 | `regular_solver.py` | A single-threaded version of the solver useful for local debugging without MPI. |
-
-## Demo
-
-Below are examples of the solver running on the cluster, distributing the workload, and finding the optimal solution.
-
-<!-- INSERT YOUR DEMO IMAGES HERE -->
 
 ## How it Works
 
