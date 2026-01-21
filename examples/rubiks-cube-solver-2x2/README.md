@@ -4,7 +4,7 @@ This directory contains a high-performance, distributed solver for the 2x2 Rubik
 
 ## Overview
 
-This project demonstrates:
+This example demonstrates:
 *   **Distributed Computing:** Using `mpi4py` to scatter search frontiers across worker nodes.
 *   **Algorithmic Optimization:** Implementing a "Fixed Corner" strategy to reduce state space redundancy by normalizing cube orientation.
 *   **Pattern Databases:** Pre-computing the back-half of the search tree to instant lookup tables.
@@ -25,7 +25,9 @@ Below are examples of the solver running on the cluster, distributing the worklo
 | :--- | :--- |
 | `mpi_solver.py` | The main distributed solver. It coordinates workers, manages the search frontier, and reconstructs the solution path. |
 | `generate_db.py` | Pre-computes the "God's Number" database up to depth 8 (halfway) and saves it as `halfway.pkl`. |
-| `solve.sbatch` | The Slurm submission script. It handles environment setup, MPI execution, and node allocation. |
+| `solve.sbatch` | The standard Slurm submission script (uses Python venv). |
+| `solve_apptainer.sbatch` | The Apptainer/Singularity submission script (uses container image). |
+| `rubiks_apptainer.def` | The definition file used to build the Apptainer container image. |
 | `cube_utils.py` | Core logic library containing move definitions, state transitions, and visualization tools. |
 | `regular_solver.py` | A single-threaded version of the solver useful for local debugging without MPI. |
 
@@ -39,22 +41,24 @@ The 2x2 Cube has approximately 3.6 million unique states. To solve it efficientl
 
 ## Prerequisites
 
-Ensure your cluster is set up with the shared NFS directory mounted at `/home/ubuntu/cluster_share`.
+Ensure your cluster is set up with the shared NFS directory mounted at `/home/ubuntu/cluster_share`. You can choose between **Option A (Virtual Env)** or **Option B (Apptainer)**.
 
-### 1. Python Environment
-You must create a virtual environment in the shared folder so all nodes can access the same dependencies (`mpi4py` is required).
+### Option A: Python Virtual Environment
+Create a virtual environment in the shared folder so all nodes can access the same dependencies.
 
 ```bash
 cd /home/ubuntu/cluster_share
 python3 -m venv venv
 source venv/bin/activate
+pip install mpi4py colorama
 ```
 
-### 2. Installation
-Install the required libraries.
+### Option B: Apptainer (Container)
+If you prefer using a container (cleaner and more portable), you can build the image from the definition file.
 
 ```bash
-pip install mpi4py colorama
+# Build the container image (requires sudo or a remote builder)
+sudo apptainer build rubiks_solver.sif rubiks_apptainer.def
 ```
 
 ## Usage
@@ -62,21 +66,35 @@ pip install mpi4py colorama
 ### 1. Generate the Database
 Before running any solves, you must generate the pattern database. This only needs to be done once.
 
+**Using Venv:**
 ```bash
-cd /home/ubuntu/cluster_share/examples/rubiks-cube-solver-2x2
+source venv/bin/activate
 python3 generate_db.py
+```
+
+**Using Apptainer:**
+```bash
+apptainer exec rubiks_solver.sif python3 generate_db.py
 ```
 *This will create a `halfway.pkl` file (~10MB).*
 
 ### 2. Submit a Job
-To solve a cube, submit the `solve.sbatch` script with a scramble sequence (represented as 24 integers).
+To solve a cube, submit the appropriate sbatch script with a scramble sequence (represented as 24 integers).
 
 **Example Scramble:**
 ```bash
 # Scramble representation: integers 0-23 representing the stickers on the faces
 SCRAMBLE="2 18 21 1 8 14 6 10 11 13 20 3 16 15 12 17 23 5 0 19 7 9 22 4"
+```
 
+**Submit with Venv:**
+```bash
 sbatch solve.sbatch "$SCRAMBLE"
+```
+
+**Submit with Apptainer:**
+```bash
+sbatch solve_apptainer.sbatch "$SCRAMBLE"
 ```
 
 ### 3. View Results
