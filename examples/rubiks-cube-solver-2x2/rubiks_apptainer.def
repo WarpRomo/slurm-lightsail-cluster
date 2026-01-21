@@ -1,0 +1,19 @@
+Bootstrap: docker
+From: python:3.10-bookworm
+
+%post
+    # Update and install MPI (Stable version uses less RAM)
+    apt-get update && apt-get install -y \
+    libopenmpi-dev \
+    openmpi-bin \
+    ssh
+
+    # Install Python packages
+    pip install --upgrade pip
+    pip install mpi4py colorama numpy
+
+    # Clean up
+    apt-get clean
+
+%environment
+    export LC_ALL=C
